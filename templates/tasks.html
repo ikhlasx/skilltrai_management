@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-tasks me-2"></i>Tasks</h2>
+    {% if user.role == 'admin' %}
+    <a href="{{ url_for('add_task') }}" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Add Task
+    </a>
+    {% endif %}
+</div>
+
+<div class="row">
+    {% for item in task_data %}
+    <div class="col-md-6 col-lg-4 mb-3">
+        <div class="card task-card task-{{ item.task.priority }}">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <h5 class="card-title">{{ item.task.title }}</h5>
+                    <span class="badge bg-{{ 'danger' if item.task.priority == 'high' else 'warning' if item.task.priority == 'medium' else 'success' }}">
+                        {{ item.task.priority|title }}
+                    </span>
+                </div>
+                <p class="card-text">{{ item.task.description[:100] }}{% if item.task.description|length > 100 %}...{% endif %}</p>
+                
+                <div class="mb-2">
+                    <small class="text-muted">
+                        <i class="fas fa-user me-1"></i>{{ item.assigned_user.username }}
+                    </small>
+                </div>
+                
+                {% if item.task.due_date %}
+                <div class="mb-2">
+                    <small class="text-muted">
+                        <i class="fas fa-calendar me-1"></i>Due: {{ item.task.due_date.strftime('%Y-%m-%d') }}
+                    </small>
+                </div>
+                {% endif %}
+                
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="badge bg-{{ 'success' if item.task.status == 'completed' else 'warning' if item.task.status == 'in_progress' else 'secondary' }}">
+                        {{ item.task.status|title }}
+                    </span>
+                    
+                    {% if item.task.status != 'completed' and (user.role == 'admin' or item.task.assigned_to == user.id) %}
+                    <div class="btn-group btn-group-sm">
+                        {% if item.task.status == 'pending' %}
+                        <a href="{{ url_for('update_task_status', task_id=item.task.id, status='in_progress') }}" class="btn btn-outline-primary btn-sm">
+                            Start
+                        </a>
+                        {% endif %}
+                        <a href="{{ url_for('update_task_status', task_id=item.task.id, status='completed') }}" class="btn btn-outline-success btn-sm">
+                            Complete
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %} 

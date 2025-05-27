@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2><i class="fas fa-chart-bar me-2"></i>Analytics Dashboard</h2>
+
+<!-- Removed the broken Export Data button for now -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>Analytics data is updated in real-time based on your system activity.
+        </div>
+    </div>
+</div>
+
+<!-- Task Analytics -->
+<div class="row mb-4">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5>Task Analytics</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="taskChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5>Task Summary</h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-12 mb-3">
+                        <h3 class="text-primary">{{ analytics.task_stats.total }}</h3>
+                        <small class="text-muted">Total Tasks</small>
+                    </div>
+                    <div class="col-6">
+                        <h4 class="text-success">{{ analytics.task_stats.completed }}</h4>
+                        <small class="text-muted">Completed</small>
+                    </div>
+                    <div class="col-6">
+                        <h4 class="text-warning">{{ analytics.task_stats.pending }}</h4>
+                        <small class="text-muted">Pending</small>
+                    </div>
+                    <div class="col-12 mt-3">
+                        <div class="progress">
+                            <div class="progress-bar" role="progressbar" style="width: {{ analytics.task_stats.completion_rate }}%">
+                                {{ analytics.task_stats.completion_rate }}%
+                            </div>
+                        </div>
+                        <small class="text-muted">Completion Rate</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- User Analytics -->
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5>User Distribution</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="userChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5>Program Statistics</h5>
+            </div>
+            <div class="card-body text-center">
+                <div class="row">
+                    <div class="col-6">
+                        <h3 class="text-info">{{ analytics.program_stats.total }}</h3>
+                        <p class="text-muted">Total Programs</p>
+                    </div>
+                    <div class="col-6">
+                        <h3 class="text-success">{{ analytics.program_stats.active_enrollments }}</h3>
+                        <p class="text-muted">Active Enrollments</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Task Chart
+const taskCtx = document.getElementById('taskChart').getContext('2d');
+const taskChart = new Chart(taskCtx, {
+    type: 'doughnut',
+    data: {
+        labels: ['Completed', 'In Progress', 'Pending'],
+        datasets: [{
+            data: [{{ analytics.task_stats.completed }}, {{ analytics.task_stats.in_progress }}, {{ analytics.task_stats.pending }}],
+            backgroundColor: ['#28a745', '#ffc107', '#6c757d']
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false
+    }
+});
+
+// User Chart
+const userCtx = document.getElementById('userChart').getContext('2d');
+const userChart = new Chart(userCtx, {
+    type: 'bar',
+    data: {
+        labels: ['Trainers', 'Students', 'Management'],
+        datasets: [{
+            label: 'Number of Users',
+            data: [{{ analytics.user_stats.trainers }}, {{ analytics.user_stats.students }}, {{ analytics.user_stats.management }}],
+            backgroundColor: ['#007bff', '#28a745', '#dc3545']
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
+    }
+});
+</script>
+{% endblock %}

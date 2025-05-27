@@ -1,0 +1,132 @@
+<!-- templates/programs.html -->
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-book me-2"></i>Training Programs</h2>
+    {% if user.role in ['admin', 'trainer'] %}
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addProgramModal">
+        <i class="fas fa-plus"></i> Add Program
+    </button>
+    {% endif %}
+</div>
+
+<div class="row">
+    {% for program in programs %}
+    <div class="col-md-6 col-lg-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">{{ program.name }}</h5>
+                <p class="card-text">
+                    {% if program.description %}
+                        {{ program.description[:100] }}{% if program.description|length > 100 %}...{% endif %}
+                    {% else %}
+                        No description available
+                    {% endif %}
+                </p>
+
+                <div class="mb-2">
+                    <small class="text-muted">
+                        <i class="fas fa-user me-1"></i>Trainer: Assigned
+                    </small>
+                </div>
+
+                {% if program.duration_weeks %}
+                <div class="mb-2">
+                    <small class="text-muted">
+                        <i class="fas fa-clock me-1"></i>Duration: {{ program.duration_weeks }} weeks
+                    </small>
+                </div>
+                {% endif %}
+
+                {% if program.start_date %}
+                <div class="mb-2">
+                    <small class="text-muted">
+                        <i class="fas fa-calendar me-1"></i>Starts: {{ program.start_date.strftime('%Y-%m-%d') }}
+                    </small>
+                </div>
+                {% endif %}
+
+                {% if program.end_date %}
+                <div class="mb-2">
+                    <small class="text-muted">
+                        <i class="fas fa-calendar-check me-1"></i>Ends: {{ program.end_date.strftime('%Y-%m-%d') }}
+                    </small>
+                </div>
+                {% endif %}
+
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <span class="badge bg-info">{{ program.max_students }} max students</span>
+                    {% if user.role == 'student' %}
+                    <button class="btn btn-sm btn-success enroll-btn" data-program-id="{{ program.id }}">
+                        <i class="fas fa-graduation-cap"></i> Enroll
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="col-12">
+        <div class="alert alert-info text-center">
+            <i class="fas fa-info-circle me-2"></i>
+            No training programs available yet.
+            {% if user.role in ['admin', 'trainer'] %}
+            <a href="#" data-bs-toggle="modal" data-bs-target="#addProgramModal" class="alert-link">Create the first program!</a>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Add Program Modal -->
+{% if user.role in ['admin', 'trainer'] %}
+<div class="modal fade" id="addProgramModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Training Program</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('programs') }}">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="program_name" class="form-label">Program Name *</label>
+                        <input type="text" class="form-control" id="program_name" name="program_name" required placeholder="e.g., AI Engineering Bootcamp">
+                    </div>
+                    <div class="mb-3">
+                        <label for="program_description" class="form-label">Description</label>
+                        <textarea class="form-control" id="program_description" name="program_description" rows="3" placeholder="Describe what this program covers..."></textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="duration_weeks" class="form-label">Duration (weeks)</label>
+                                <input type="number" class="form-control" id="duration_weeks" name="duration_weeks" min="1" max="52" placeholder="e.g., 8">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="max_students" class="form-label">Max Students</label>
+                                <input type="number" class="form-control" id="max_students" name="max_students" value="20" min="1" max="100">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="start_date" class="form-label">Start Date</label>
+                        <input type="date" class="form-control" id="start_date" name="start_date">
+                        <small class="form-text text-muted">Leave empty if not scheduled yet</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Create Program
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
