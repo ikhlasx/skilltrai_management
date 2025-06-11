@@ -75,6 +75,19 @@ class GoToMarketStrategy(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     # Removed updated_at column to avoid database conflict
 
+# Create tables and default admin user if needed
+with app.app_context():
+    db.create_all()
+    if not User.query.filter_by(username='admin').first():
+        admin = User(
+            username='admin',
+            email='admin@skilltrain.com',
+            password_hash=generate_password_hash('admin123'),
+            role='admin'
+        )
+        db.session.add(admin)
+        db.session.commit()
+
 # Authentication decorators
 def login_required(f):
     @wraps(f)
